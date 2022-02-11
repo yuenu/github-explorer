@@ -1,9 +1,9 @@
-interface Owner {
+export interface Owner {
   login: string
   id: number
   node_id: string
   avatar_url: string
-  gravatar_id: string
+  gravatar_id: string | null
   url: string
   html_url: string
   followers_url: string
@@ -19,15 +19,16 @@ interface Owner {
   site_admin: boolean
 }
 
-interface License {
+export interface License {
   key: string
   name: string
-  spdx_id: string
-  url: string
+  url: string | null
+  spdx_id: string | null
   node_id: string
+  html_url?: string | undefined
 }
 
-export type Item = {
+export interface Item {
   id: number
   node_id: string
   name: string
@@ -35,7 +36,7 @@ export type Item = {
   private: boolean
   owner: Owner | null
   html_url: string
-  description: string
+  description: string | null
   fork: boolean
   url: string
   forks_url: string
@@ -74,33 +75,33 @@ export type Item = {
   labels_url: string
   releases_url: string
   deployments_url: string
-  created_at: Date
-  updated_at: Date
-  pushed_at: Date
+  created_at: string
+  updated_at: string
+  pushed_at: string
   git_url: string
   ssh_url: string
   clone_url: string
   svn_url: string
-  homepage: string
+  homepage: string | null
   size: number
   stargazers_count: number
   watchers_count: number
-  language: string
+  language: string | null
   has_issues: boolean
   has_projects: boolean
   has_downloads: boolean
   has_wiki: boolean
   has_pages: boolean
   forks_count: number
-  mirror_url?: any
+  mirror_url: string | null
   archived: boolean
   disabled: boolean
   open_issues_count: number
-  license: License
-  allow_forking: boolean
-  is_template: boolean
-  topics: string[]
-  visibility: string
+  license: License | null
+  allow_forking?: boolean
+  is_template?: boolean
+  topics?: string[]
+  visibility?: string
   forks: number
   open_issues: number
   watchers: number
@@ -108,7 +109,7 @@ export type Item = {
   score: number
 }
 
-export interface Data {
+export interface RootObject {
   total_count: number
   incomplete_results: boolean
   items: Item[]
