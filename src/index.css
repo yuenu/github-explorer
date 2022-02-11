@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  background: #f5f3f7;
+  padding-bottom: 100px;
+}
+
 .lds-dual-ring {
   display: inline-block;
   width: 80px;
