@@ -1,17 +1,18 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Octokit } from 'octokit'
+import { RootObject } from '@/types'
 /* eslint-disable */
 
 const octokit = new Octokit({ auth: process.env.GITHUB_ACCESS_TOKEN })
 
 const useFetch = ({ q }: { q: string }) => {
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<RootObject['items']>([])
   const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
+  const fetchRepositoryData = useCallback(() => {
     ;(async function fetchData() {
       setLoading(true)
-      return await octokit
+      await octokit
         .request('GET /search/repositories', {
           q: q,
         })
@@ -23,6 +24,10 @@ const useFetch = ({ q }: { q: string }) => {
         })
         .catch((e) => console.error('[Search api] error:', e))
     })()
+  }, [data])
+
+  useEffect(() => {
+    fetchRepositoryData()
   }, [])
 
   return {
