@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { Octokit } from 'octokit'
 import { RootObject } from '@/types'
 import GITHUB_ACCESS_TOKEN from '@/github'
-/* eslint-disable */
 
 const octokit = new Octokit({ auth: GITHUB_ACCESS_TOKEN })
 
@@ -14,32 +13,46 @@ type Props = {
   page?: number
 }
 
-const useFetch = (props: Props) => {
-  console.log(props)
-  const [data, setData] = useState<RootObject['items']>([])
-  const [loading, setLoading] = useState(false)
+const useFetch = (query: string) => {
+  const [response, setResponse] = useState<RootObject['items']>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<Error | null>()
+  const [page, setPage] = useState(0)
 
-  const fetchRepositoryData = useCallback(async () => {
-    setLoading(true)
-    await octokit
-      .request('GET /search/repositories', props)
-      .then((response) => {
-        if (response.status === 200) {
-          setData(response.data.items)
-          setLoading(false)
-        } else throw 'Unexpect error'
-      })
-      .catch((e) => console.error('[Search api] error:', e))
+  const doFetch = useCallback(() => {
+    setIsLoading(true)
+    setPage((prev) => prev + 1)
   }, [])
 
   useEffect(() => {
-    fetchRepositoryData()
-  }, [props.page])
+    if (!isLoading) return
+    const abortController = new AbortController()
+    ;(async () => {
+      try {
+        const response = await octokit.request('GET /search/repositories', {
+          q: query,
+          page: page,
+          signal: abortController.signal,
+        })
+        setResponse(response.data.items)
+      } catch (error: any) {
+        if (error.name === 'AbortError') {
+          return
+        }
+        setError(error)
+        setIsLoading(false)
+      }
+    })()
+  }, [isLoading, page, query])
 
-  return {
-    data,
-    loading,
-  }
+  return [
+    {
+      response,
+      isLoading,
+      error,
+    },
+    doFetch,
+  ]
 }
 
 export default useFetch

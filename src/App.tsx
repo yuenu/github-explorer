@@ -1,102 +1,123 @@
-import { useFetch, useIntersectionObserver } from './hooks'
-import Icon from './components/Icon'
+import {
+  useEffect,
+  useRef,
+  useState,
+  useReducer,
+  ReactNode,
+  createContext,
+  useContext,
+} from 'react'
 import { Item } from '@/types'
-import { parseNumber, timeSince } from '@/utils'
-import { useEffect, useRef, useState } from 'react'
+import { ResultList, Search } from '@/components'
+import { reducer, ActionType } from '@/state'
+import { useFetch } from '@/hooks'
 
-function App() {
-  const [page, setPage] = useState(1)
-  const [results, setResults] = useState<Item[]>([])
-  const { data } = useFetch({ q: 'react', per_page: 10, page })
+import { Octokit } from 'octokit'
+import GITHUB_ACCESS_TOKEN from '@/github'
+const octokit = new Octokit({ auth: GITHUB_ACCESS_TOKEN })
+
+// REDUCER
+const initialState = {
+  loading: false,
+  more: true,
+  data: [] as Item[],
+  after: 1,
+}
+
+export interface AppContextInterface {
+  loading: boolean
+  data: Item[]
+  more: boolean
+  load: () => void
+}
+const AppContext = createContext<AppContextInterface>({
+  loading: false,
+  data: [] as Item[],
+  more: false,
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  load: () => {},
+})
+
+const AppProvider = ({ children }: { children: ReactNode }) => {
+  const [state, dispatch] = useReducer(reducer, initialState)
+
+  const { loading, data, after, more } = state
+
+  const load = () => {
+    console.log('fetch the data')
+    dispatch({ type: ActionType.START })
+
+    try {
+      octokit
+        .request('GET /search/repositories', { q: 'react', page: after })
+        .then((response) => {
+          console.log(response)
+          dispatch({
+            type: ActionType.LOADED,
+            payload: { newData: response.data.items },
+          })
+        })
+    } catch {
+      throw 'Unexpect error on fetch data'
+    }
+  }
+
+  console.log(loading, data, more)
+  return (
+    <AppContext.Provider value={{ loading, data, more, load }}>
+      {children}
+    </AppContext.Provider>
+  )
+}
+
+const App = () => {
+  // const { data, loading, more, load } = useContext(AppContext)
+  const [{ response, isLoading, error }, doFetch] = useFetch('react')
+  const [element, setElement] = useState<HTMLElement | null>(null)
+
+  const observer = useRef(
+    new IntersectionObserver(
+      (entries) => {
+        const first = entries[0]
+        if (first.intersectionRatio) {
+          console.log('toggle')
+        }
+      },
+      { threshold: 1 }
+    )
+  )
 
   const handleClick = () => {
-    setPage((prev) => prev + 1)
+    console.log('clicked')
   }
 
   useEffect(() => {
-    setResults((prev) => prev.concat(data))
-  }, [data])
-  return (
-    <div className="min-h-screen px-4">
-      <div className="w-full max-w-lg pt-10 mx-auto space-y-5">
-        <h1 className="text-3xl font-bold">Github Explorer</h1>
-        <Search />
-        <Results items={results} />
-        <button onClick={handleClick}>more</button>
-      </div>
-    </div>
-  )
-}
+    const currentElement = element
+    const currentObserver = observer.current
 
-function Search() {
-  return (
-    <div className="space-x-3">
-      <span className="font-bold text-amber-700">Search Repos</span>
-      <input className="" type="text" />
-    </div>
-  )
-}
+    if (currentElement) {
+      currentObserver.observe(currentElement)
+    }
+    return () => {
+      if (currentElement) {
+        currentObserver.unobserve(currentElement)
+      }
+    }
+  }, [element])
 
-type ResultProps = {
-  items: Item[]
-}
-
-function Results({ items }: ResultProps) {
-  const ref = useRef<HTMLBodyElement>(document.querySelector('body'))
-  const entry = useIntersectionObserver(ref, {
-    rootMargin: '0px 0px 20px 0px',
-    threshold: 0,
-  })
-  const isVisible = !!entry?.isIntersecting
   return (
-    <div className="space-y-6">
-      {items.length > 0 ? (
-        items.map((item: Item, index: number) => {
-          if (items.length === index + 1) {
-            return <ResultItem key={item.id} item={item} />
-          } else {
-            return <ResultItem key={item.id} item={item} />
-          }
-        })
-      ) : (
-        <div className="lds-dual-ring"></div>
-      )}
-    </div>
-  )
-}
-
-function ResultItem({ item }: { item: Item }) {
-  return (
-    <div className="p-3 bg-white rounded-lg drop-shadow-md" key={item.id}>
-      <a
-        href={item.html_url}
-        className="flex gap-3 hover:underline hover:decoration-blue-700"
-      >
-        <Icon.Repository className="w-3" />
-        <span className="text-sm text-blue-700">{item.full_name}</span>
-      </a>
-      <div className="mt-2 ml-6 text-sm text-gray-800">{item.description}</div>
-      <div className="flex flex-wrap items-center mt-2 ml-6 gap-x-1 gap-y-2">
-        {item.topics &&
-          item.topics.map((topic: string, index: number) => (
-            <a
-              key={index}
-              className="px-3 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-2xl "
-            >
-              {topic}
-            </a>
-          ))}
-      </div>
-      <div className="flex flex-wrap items-center mt-2 ml-6 text-xs text-gray-500 gap-x-3 gap-y-1">
-        <div className="flex items-center gap-1 break-words ">
-          <Icon.Star className="w-3" />
-          <span>{parseNumber(item.stargazers_count)}</span>
+    <AppProvider>
+      <div className="min-h-screen px-4">
+        <div className="w-full max-w-lg pt-10 mx-auto space-y-5">
+          <h1 className="text-3xl font-bold">Github Explorer</h1>
+          <Search />
+          <ResultList items={response} error={error} loading={isLoading} />
+          <button ref={setElement} onClick={}>
+            more
+          </button>
         </div>
-        <div>{item.language}</div>
-        <div>{item.license && item.license.name}</div>
-        <div>Updated {timeSince(item.updated_at)}</div>
       </div>
-    </div>
+    </AppProvider>
   )
 }
 
