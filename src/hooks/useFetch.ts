@@ -3,8 +3,7 @@ import { Octokit } from 'octokit'
 import { Item } from '@/types'
 import { useNavigate } from 'react-router-dom'
 
-import GITHUB_ACCESS_TOKEN from '@/github'
-const octokit = new Octokit({ auth: GITHUB_ACCESS_TOKEN })
+const octokit = new Octokit({ auth: process.env.REACT_APP_GITHUB_ACCESS_TOKEN })
 
 type State = {
   response: Item[]

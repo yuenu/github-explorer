@@ -1,8 +1,7 @@
 import { Octokit } from 'octokit'
 import type { Query, Item } from '@/types'
-import GITHUB_ACCESS_TOKEN from '@/github'
 
-const octokit = new Octokit({ auth: GITHUB_ACCESS_TOKEN })
+const octokit = new Octokit({ auth: process.env.REACT_APP_GITHUB_ACCESS_TOKEN })
 
 export async function fetchRepo(query: Query): Promise<Item[]> {
   return await octokit
