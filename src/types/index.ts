@@ -114,3 +114,19 @@ export interface RootObject {
   incomplete_results: boolean
   items: Item[]
 }
+
+export type Query = {
+  q: string
+  sort?: 'stars' | 'forks' | 'help-wanted-issues' | 'updated' | undefined
+  order?: 'desc' | 'asc' | undefined
+  per_page?: number | undefined
+  page?: number | undefined
+}
+
+export type State = {
+  results: Item[]
+  isLoading: boolean
+  isMore: boolean
+  fetchTimestamp: number | null
+  query: Query
+}

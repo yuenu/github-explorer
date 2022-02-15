@@ -1,6 +1,8 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Octokit } from 'octokit'
 import { Item } from '@/types'
+import { useNavigate } from 'react-router-dom'
+
 import GITHUB_ACCESS_TOKEN from '@/github'
 const octokit = new Octokit({ auth: GITHUB_ACCESS_TOKEN })
 
@@ -12,6 +14,7 @@ type State = {
 }
 
 const useFetch = (query: string): State => {
+  const navigate = useNavigate()
   const [response, setResponse] = useState<Item[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>()
@@ -39,8 +42,9 @@ const useFetch = (query: string): State => {
         setError(error)
       }
       setIsLoading(false)
+      navigate(`search?q=${query}&page=${page}`, { replace: true })
     })()
-  }, [isLoading, page, query])
+  }, [isLoading, navigate, page, query])
 
   return {
     response,

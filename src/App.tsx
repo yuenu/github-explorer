@@ -1,32 +1,27 @@
 import { useEffect, useRef, useState } from 'react'
-import { Item } from '@/types'
 import { ResultList, Search } from '@/components'
-import { useFetch } from '@/hooks'
+import { useFetchRepo } from '@/hooks'
 
 const App = () => {
-  const [data, setData] = useState<Item[]>([])
-  const { response, isLoading, error, doFetch } = useFetch('react')
   const [element, setElement] = useState<HTMLElement | null>(null)
+  const { state, fetcher } = useFetchRepo()
+  const [page, setPage] = useState(1)
 
   const observer = useRef(
     new IntersectionObserver(
       (entries) => {
         const first = entries[0]
         if (
-          !isLoading &&
+          !state.isLoading &&
           first.intersectionRatio &&
           Math.floor(first.intersectionRatio) === 1
         ) {
-          doFetch()
+          setPage((prev) => prev + 1)
         }
       },
       { threshold: 1, rootMargin: '0px 0px 1000px 0px' }
     )
   )
-
-  const handleClick = () => {
-    if (!isLoading) doFetch()
-  }
 
   useEffect(() => {
     const currentElement = element
@@ -42,17 +37,21 @@ const App = () => {
     }
   }, [element])
 
+  const loadPage = () => {
+    setPage((prev) => prev + 1)
+  }
+
   useEffect(() => {
-    setData((prev) => prev.concat(response))
-  }, [response])
+    fetcher({ query: { q: 'react', page: page } })
+  }, [fetcher, page])
 
   return (
     <div className="min-h-screen px-4">
       <div className="w-full max-w-lg pt-10 mx-auto space-y-5">
         <h1 className="text-3xl font-bold">Github Explorer</h1>
         <Search />
-        <ResultList items={data} error={error} loading={isLoading} />
-        <button ref={setElement} onClick={handleClick}>
+        <ResultList items={state.results} loading={state.isLoading} />
+        <button ref={setElement} onClick={loadPage}>
           more
         </button>
       </div>

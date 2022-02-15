@@ -3,7 +3,7 @@ import { Spinner, ResultItem } from '.'
 
 type ResultProps = {
   items: Item[]
-  error: Error | null | undefined
+  error?: Error | null | undefined
   loading: boolean
 }
 

@@ -1,4 +1,6 @@
 export enum ActionType {
-  START = 'START',
   LOADED = 'LOADED',
+  FETCH_START = 'FETCH_START',
+  FETCH_END = 'FETCH_END',
+  SWITCH_QUERY = 'SWITCH_QUERY',
 }

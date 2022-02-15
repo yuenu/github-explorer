@@ -1,17 +1,36 @@
 import { Item } from '@/types'
 import { ActionType } from './action-type'
+import { Query } from '@/types'
 
-type ActionPayload = {
-  newData: Item[]
+export interface FetchStartAction {
+  type: ActionType.FETCH_START
+  payload: {
+    fetchTimestamp: number
+  }
 }
 
-interface StartAction {
-  type: ActionType.START
+export interface FetchEndAction {
+  type: ActionType.FETCH_END
 }
 
-interface LoadedAction {
+export interface LoadedAction {
   type: ActionType.LOADED
-  payload: ActionPayload
+  payload: {
+    response: Item[]
+    query: Query
+  }
 }
 
-export type Action = StartAction | LoadedAction
+export interface SwitchQueryAction {
+  type: ActionType.SWITCH_QUERY
+  payload: {
+    response: Item[]
+    query: Query
+  }
+}
+
+export type Action =
+  | FetchStartAction
+  | FetchEndAction
+  | LoadedAction
+  | SwitchQueryAction

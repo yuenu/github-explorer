@@ -1,30 +1,46 @@
 import { Action } from './action'
-import { Item } from '@/types'
+import type { State } from '@/types'
 import { perPage } from '@/constant'
 import { ActionType } from './action-type'
 
-type IState = {
-  data: Item[]
-  loading: boolean
-  more: boolean
-  after: number
+export const initialState = {
+  results: [],
+  isLoading: false,
+  query: {
+    q: 'react',
+    page: -1,
+    perPage: perPage,
+  },
+  isMore: true,
+  fetchTimestamp: null,
 }
 
-const reducer = (state: IState, action: Action) => {
+export const reducer = (state: State = initialState, action: Action): State => {
   switch (action.type) {
-    case ActionType.START:
-      return { ...state, loading: true }
+    case ActionType.FETCH_START:
+      return {
+        ...state,
+        isLoading: true,
+        fetchTimestamp: action.payload.fetchTimestamp,
+      }
     case ActionType.LOADED:
       return {
         ...state,
-        loading: false,
-        data: [...state.data, ...action.payload.newData],
-        more: action.payload.newData.length === perPage,
-        after: state.after + action.payload.newData.length,
+        results: state.results.concat(action.payload.response),
+        query: action.payload.query,
+      }
+    case ActionType.SWITCH_QUERY:
+      return {
+        ...state,
+        results: action.payload.response,
+        query: action.payload.query,
+      }
+    case ActionType.FETCH_END:
+      return {
+        ...state,
+        isLoading: false,
       }
     default:
       return state
   }
 }
-
-export default reducer
