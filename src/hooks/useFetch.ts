@@ -9,20 +9,30 @@ type State = {
   response: Item[]
   isLoading: boolean
   error: Error | null | undefined
-  doFetch: () => void
 }
 
-const useFetch = (query: string): State => {
+const useFetch = (): [State, (search?: string | undefined | null) => void] => {
   const navigate = useNavigate()
   const [response, setResponse] = useState<Item[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>()
   const [page, setPage] = useState(0)
+  const [query, setQuery] = useState('react')
 
-  const doFetch = useCallback(() => {
-    setPage((prev) => prev + 1)
-    setIsLoading(true)
-  }, [])
+  const doFetch = useCallback(
+    (search?: string | null) => {
+      if (isLoading) return
+      if (search) {
+        setPage(1)
+        setQuery(search)
+      } else {
+        setPage((prev) => prev + 1)
+      }
+
+      setIsLoading(true)
+    },
+    [isLoading]
+  )
 
   useEffect(() => {
     if (!isLoading) return // const abortController = new AbortController()
@@ -45,12 +55,7 @@ const useFetch = (query: string): State => {
     })()
   }, [isLoading, navigate, page, query])
 
-  return {
-    response,
-    isLoading,
-    error,
-    doFetch,
-  }
+  return [{ response, isLoading, error }, doFetch]
 }
 
 export default useFetch

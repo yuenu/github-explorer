@@ -1,59 +1,51 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { ResultList, Search } from '@/components'
-import { useFetchRepo } from '@/hooks'
+import { useFetch } from '@/hooks'
+import { useSearchParams } from 'react-router-dom'
 
 const App = () => {
-  const [element, setElement] = useState<HTMLElement | null>(null)
-  const { state, fetcher } = useFetchRepo()
-  const [page, setPage] = useState(1)
+  const [{ response, isLoading, error }, doFetch] = useFetch()
+  const search = useRef('react')
+  const elementRef = useRef<HTMLButtonElement | null>(null)
+  const [searchParams] = useSearchParams({})
+  useEffect(() => {
+    if (!elementRef.current) return
 
-  const observer = useRef(
-    new IntersectionObserver(
+    const observer = new IntersectionObserver(
       (entries) => {
         const first = entries[0]
         if (
-          !state.isLoading &&
+          !isLoading &&
           first.intersectionRatio &&
           Math.floor(first.intersectionRatio) === 1
         ) {
-          setPage((prev) => prev + 1)
+          doFetch()
         }
       },
-      { threshold: 1, rootMargin: '0px 0px 1000px 0px' }
+      { threshold: 1, rootMargin: '200px' }
     )
-  )
+
+    observer.observe(elementRef.current)
+
+    return () => observer.disconnect()
+  }, [isLoading, doFetch])
 
   useEffect(() => {
-    const currentElement = element
-    const currentObserver = observer.current
-
-    if (currentElement) {
-      currentObserver.observe(currentElement)
+    if (search.current === searchParams.get('q')) return
+    if (searchParams.get('q')) {
+      doFetch(searchParams.get('q'))
+      search.current = searchParams.get('q') || ''
     }
-    return () => {
-      if (currentElement) {
-        currentObserver.unobserve(currentElement)
-      }
-    }
-  }, [element])
-
-  const loadPage = () => {
-    setPage((prev) => prev + 1)
-  }
-
-  useEffect(() => {
-    fetcher({ query: { q: 'react', page: page } })
-  }, [fetcher, page])
+  }, [doFetch, searchParams])
 
   return (
     <div className="min-h-screen px-4">
       <div className="w-full max-w-lg pt-10 mx-auto space-y-5">
         <h1 className="text-3xl font-bold">Github Explorer</h1>
+        <button>trigger</button>
         <Search />
-        <ResultList items={state.results} loading={state.isLoading} />
-        <button ref={setElement} onClick={loadPage}>
-          more
-        </button>
+        <ResultList items={response} loading={isLoading} error={error} />
+        <button ref={elementRef}>more</button>
       </div>
     </div>
   )
