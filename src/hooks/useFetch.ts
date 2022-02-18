@@ -50,8 +50,8 @@ const useFetch = (): [State, (search?: string | undefined | null) => void] => {
         }
         setError(error)
       }
-      setIsLoading(false)
       navigate(`search?q=${query}&page=${page}`, { replace: true })
+      setIsLoading(false)
     })()
   }, [isLoading, navigate, page, query])
 

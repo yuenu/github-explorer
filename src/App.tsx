@@ -9,7 +9,7 @@ const App = () => {
   const elementRef = useRef<HTMLButtonElement | null>(null)
   const [searchParams] = useSearchParams({})
   useEffect(() => {
-    if (!elementRef.current) return
+    if (!elementRef.current || error) return
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -22,27 +22,27 @@ const App = () => {
           doFetch()
         }
       },
-      { threshold: 1, rootMargin: '200px' }
+      { threshold: 1, rootMargin: '500px' }
     )
 
     observer.observe(elementRef.current)
 
     return () => observer.disconnect()
-  }, [isLoading, doFetch])
+  }, [isLoading, doFetch, error])
 
   useEffect(() => {
+    if (error) return
     if (search.current === searchParams.get('q')) return
     if (searchParams.get('q')) {
       doFetch(searchParams.get('q'))
       search.current = searchParams.get('q') || ''
     }
-  }, [doFetch, searchParams])
+  }, [doFetch, searchParams, error])
 
   return (
     <div className="min-h-screen px-4">
       <div className="w-full max-w-lg pt-10 mx-auto space-y-5">
         <h1 className="text-3xl font-bold">Github Explorer</h1>
-        <button>trigger</button>
         <Search />
         <ResultList items={response} loading={isLoading} error={error} />
         <button ref={elementRef}>more</button>
