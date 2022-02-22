@@ -1,4 +1,6 @@
-# Github explorer [Live demo](https://github-explorer-ce777.web.app/)
+# Github explorer
+
+[Live demo](https://github-explorer-ce777.web.app/)
 
 ## Built with
 
