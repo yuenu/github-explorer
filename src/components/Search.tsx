@@ -22,13 +22,14 @@ const Search = () => {
     <div className="space-x-3">
       <span className="font-bold text-amber-700">Search Repos</span>
       <input
+        data-cy="input"
         className="px-3 py-1 rounded-sm"
         type="text"
         onChange={onInputChange}
         value={query}
         onKeyPress={onKeyPress}
       />
-      <button type="button" onClick={onClick}>
+      <button type="submit" data-cy="submit" onClick={onClick}>
         Search
       </button>
     </div>
