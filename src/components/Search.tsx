@@ -1,38 +1,38 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useFetchRepo } from '@/hooks'
+import { ActionType } from '@/state'
 
 const Search = () => {
-  const navigate = useNavigate()
-  const [query, setQuery] = useState('')
+  const [inputQuery, setInputQuery] = useState('')
+  const fetcher = useFetchRepo()
 
   const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setQuery(e.target.value)
+    setInputQuery(e.target.value)
   }
 
-  const onKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      navigate(`search?q=${query}`, { replace: true })
-    }
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    fetcher({
+      query: { q: inputQuery, page: 1 },
+      type: ActionType.SWITCH_QUERY,
+    })
   }
 
-  const onClick = () => {
-    navigate(`search?q=${query}`, { replace: true })
-  }
+
   return (
-    <div className="space-x-3">
+    <form className="space-x-3" onSubmit={onSubmit}>
       <span className="font-bold text-amber-700">Search Repos</span>
       <input
         data-cy="input"
         className="px-3 py-1 rounded-sm"
         type="text"
         onChange={onInputChange}
-        value={query}
-        onKeyPress={onKeyPress}
+        value={inputQuery}
       />
-      <button type="submit" data-cy="submit" onClick={onClick}>
+      <button type="submit" data-cy="submit">
         Search
       </button>
-    </div>
+    </form>
   )
 }
 

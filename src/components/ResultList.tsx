@@ -1,22 +1,38 @@
-import { Item } from '@/types'
-import { Spinner, ResultItem } from '.'
+import { useEffect, useRef } from 'react'
+import { Spinner, ResultItem } from '@/components'
+import { useFetchRepo, useStore } from '@/hooks'
 
-type ResultProps = {
-  items: Item[]
-  error?: Error | null | undefined
-  loading: boolean
-}
+const ResultsList = () => {
+  const { state } = useStore()
+  const moreRef = useRef<HTMLSpanElement | null>(null)
+  const fetcher = useFetchRepo()
 
-const ResultsList = ({ items, error, loading }: ResultProps) => {
-  const rednerResults = () => {
-    if (!!error) return <p className="text-red-600">{error}</p>
-    if (items && items.length > 0)
-      return items.map((item) => <ResultItem key={item.id} item={item} />)
-  }
+  useEffect(() => {
+    if(!moreRef.current) return
+
+    const observer = new IntersectionObserver((entries) => {
+      const first = entries[0]
+      if(!state.isLoading && first.intersectionRatio && state.query.page) {
+        fetcher({ query: {
+          ...state.query,
+          page: state.results.length > 0 ? state.query.page + 1 : 1
+        }})
+      }
+    }, { threshold: 1})
+
+    observer.observe(moreRef.current)
+
+    return () => observer.disconnect()
+
+  }, [fetcher, state.isLoading, state.query, state.results.length])
+
   return (
     <div className="space-y-6">
-      {rednerResults()}
-      {!error && loading && <Spinner />}
+      {state.results.map((item) => (
+        <ResultItem key={item.id} item={item} />
+      ))}
+      {state.isLoading && <Spinner />}
+      <span ref={moreRef}></span>
     </div>
   )
 }

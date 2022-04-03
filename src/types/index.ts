@@ -1,3 +1,5 @@
+import { Action, ActionType } from '@/state'
+
 export interface Owner {
   login: string
   id: number
@@ -123,10 +125,19 @@ export type Query = {
   page?: number | undefined
 }
 
-export type State = {
+export type IState = {
   results: Item[]
   isLoading: boolean
-  isMore: boolean
-  fetchTimestamp: number | null
+  hasMore: boolean
   query: Query
+}
+
+export type Props = {
+  query?: Query
+  type?: ActionType.LOADED | ActionType.SWITCH_QUERY
+}
+
+export type AppContextInterface = {
+  state: IState
+  dispatch: React.Dispatch<Action>
 }

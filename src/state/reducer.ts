@@ -1,5 +1,5 @@
 import { Action } from './action'
-import type { State } from '@/types'
+import type { IState } from '@/types'
 import { perPage } from '@/constant'
 import { ActionType } from './action-type'
 
@@ -11,35 +11,46 @@ export const initialState = {
     page: -1,
     perPage: perPage,
   },
-  isMore: true,
-  fetchTimestamp: null,
+  hasMore: true,
 }
 
-export const reducer = (state: State = initialState, action: Action): State => {
+export const reducer = (
+  state: IState = initialState,
+  action: Action
+): IState => {
   switch (action.type) {
     case ActionType.FETCH_START:
       return {
         ...state,
         isLoading: true,
-        fetchTimestamp: action.payload.fetchTimestamp,
       }
-    case ActionType.LOADED:
+    case ActionType.LOADED: {
+      const { response, query } = action.payload
       return {
         ...state,
-        results: state.results.concat(action.payload.response),
-        query: action.payload.query,
+        results: [...state.results, ...response],
+        query: { ...state.query, ...query },
       }
-    case ActionType.SWITCH_QUERY:
+    }
+    case ActionType.SWITCH_QUERY: {
+      const { response, query } = action.payload
       return {
         ...state,
-        results: action.payload.response,
-        query: action.payload.query,
+        results: response,
+        query: { ...state.query, ...query },
       }
+    }
     case ActionType.FETCH_END:
       return {
         ...state,
         isLoading: false,
       }
+    case ActionType.CLEAR_RESULTS: {
+      return {
+        ...state,
+        results: []
+      }
+    }
     default:
       return state
   }

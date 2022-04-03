@@ -1,33 +1,26 @@
-import { useReducer, useCallback } from 'react'
-import { reducer, initialState, ActionType } from '@/state'
+import { useCallback } from 'react'
+import { ActionType } from '@/state'
 import { useNavigate } from 'react-router-dom'
 import { fetchRepo } from '@/api'
-import { Query, State } from '@/types'
+import { Query } from '@/types'
+import { useStore } from '@/hooks'
 
 type Props = {
-  query: Query
+  query?: Query
   type?: ActionType.LOADED | ActionType.SWITCH_QUERY
 }
 
-type Response = {
-  state: State
-  fetcher: ({ query, type }: Props) => void
-}
-
-const useFetchRepo = (): Response => {
+const useFetchRepo = () => {
   const navigate = useNavigate()
-  const [state, dispatch] = useReducer(reducer, initialState)
+  const { dispatch } = useStore()
 
   const fetcher = useCallback(
-    ({ query, type = ActionType.LOADED }: Props) => {
-      const now = Date.now()
-
+    ({ query = { q: 'react', page: 1 }, type = ActionType.LOADED }: Props) => {
       dispatch({
         type: ActionType.FETCH_START,
-        payload: {
-          fetchTimestamp: now,
-        },
       })
+
+      if(type === ActionType.SWITCH_QUERY) dispatch({type: ActionType.CLEAR_RESULTS})
 
       fetchRepo(query).then((response) => {
         dispatch({
@@ -45,10 +38,10 @@ const useFetchRepo = (): Response => {
 
       navigate(`search?q=${query.q}&page=${query.page}`, { replace: true })
     },
-    [navigate]
+    [dispatch, navigate]
   )
 
-  return { state, fetcher }
+  return fetcher
 }
 
 export default useFetchRepo

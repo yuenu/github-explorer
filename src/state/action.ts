@@ -4,9 +4,6 @@ import { Query } from '@/types'
 
 export interface FetchStartAction {
   type: ActionType.FETCH_START
-  payload: {
-    fetchTimestamp: number
-  }
 }
 
 export interface FetchEndAction {
@@ -29,8 +26,13 @@ export interface SwitchQueryAction {
   }
 }
 
+export interface ClearResultsAction {
+  type: ActionType.CLEAR_RESULTS
+}
+
 export type Action =
   | FetchStartAction
   | FetchEndAction
   | LoadedAction
   | SwitchQueryAction
+  | ClearResultsAction

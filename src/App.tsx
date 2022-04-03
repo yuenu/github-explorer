@@ -1,53 +1,33 @@
-import { useEffect, useRef } from 'react'
+import { useReducer } from 'react'
 import { ResultList, Search } from '@/components'
-import { useFetch } from '@/hooks'
-import { useSearchParams } from 'react-router-dom'
+import { reducer, initialState } from '@/state'
+import { StoreProvider } from '@/hooks'
 
 const App = () => {
-  const [{ response, isLoading, error }, doFetch] = useFetch()
-  const search = useRef('react')
-  const elementRef = useRef<HTMLButtonElement | null>(null)
-  const [searchParams] = useSearchParams({})
-  useEffect(() => {
-    if (!elementRef.current || error) return
+  const [state, dispatch] = useReducer(reducer, initialState)
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const first = entries[0]
-        if (
-          !isLoading &&
-          first.intersectionRatio &&
-          Math.floor(first.intersectionRatio) === 1
-        ) {
-          doFetch()
-        }
-      },
-      { threshold: 1, rootMargin: '500px' }
-    )
+  // const search = useRef('react')
 
-    observer.observe(elementRef.current)
 
-    return () => observer.disconnect()
-  }, [isLoading, doFetch, error])
-
-  useEffect(() => {
-    if (error) return
-    if (search.current === searchParams.get('q')) return
-    if (searchParams.get('q')) {
-      doFetch(searchParams.get('q'))
-      search.current = searchParams.get('q') || ''
-    }
-  }, [doFetch, searchParams, error])
+  // useEffect(() => {
+  //   if (error) return
+  //   if (search.current === searchParams.get('q')) return
+  //   if (searchParams.get('q')) {
+  //     doFetch(searchParams.get('q'))
+  //     search.current = searchParams.get('q') || ''
+  //   }
+  // }, [doFetch, searchParams, error])
 
   return (
-    <div className="min-h-screen px-4">
-      <div className="w-full max-w-lg pt-10 mx-auto space-y-5">
-        <h1 className="text-3xl font-bold">Github Explorer</h1>
-        <Search />
-        <ResultList items={response} loading={isLoading} error={error} />
-        <button ref={elementRef}>more</button>
+    <StoreProvider value={{ state, dispatch }}>
+      <div className="min-h-screen px-4">
+        <div className="w-full max-w-lg pt-10 mx-auto space-y-5">
+          <h1 className="text-3xl font-bold">Github Explorer</h1>
+          <Search />
+          <ResultList />
+        </div>
       </div>
-    </div>
+    </StoreProvider>
   )
 }
 
