@@ -2,9 +2,13 @@ import { Item } from '@/types'
 import { parseNumber, timeSince } from '@/utils'
 import { Icon } from '@/components'
 
-const ResultItem = ({ item }: { item: Item }) => {
+interface Props {
+    item: Item,
+}
+
+const ResultItem = ({ item }: Props) => {
   return (
-    <div className="p-3 bg-white rounded-lg drop-shadow-md" key={item.id}>
+    <div className="p-3 bg-white rounded-lg drop-shadow-md" key={item.id} data-cy="item" >
       <a
         href={item.html_url}
         className="flex gap-3 hover:underline hover:decoration-blue-700"

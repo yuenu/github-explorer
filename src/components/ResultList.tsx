@@ -27,13 +27,16 @@ const ResultsList = () => {
   }, [fetcher, state.isLoading, state.query, state.results.length])
 
   return (
-    <div className="space-y-6">
-      {state.results.map((item) => (
-        <ResultItem key={item.id} item={item} />
-      ))}
-      {state.isLoading && <Spinner />}
-      <span ref={moreRef}></span>
-    </div>
+    <>
+      <div className="space-y-6" data-cy="item-list">
+        {state.results.map((item) => (
+          <ResultItem key={item.id} item={item}  />
+        ))}
+        {state.isLoading && <Spinner />}
+      </div>
+      <span ref={moreRef} data-cy="intersection-entry"></span>
+    </>
+
   )
 }
 

@@ -21,13 +21,13 @@ const Search = () => {
 
   return (
     <form className="space-x-3" onSubmit={onSubmit}>
-      <span className="font-bold text-amber-700">Search Repos</span>
+      <span className="font-bold text-amber-700" data-cy="title">Search Repos</span>
       <input
-        data-cy="input"
         className="px-3 py-1 rounded-sm"
         type="text"
         onChange={onInputChange}
         value={inputQuery}
+        data-cy="search-input"
       />
       <button type="submit" data-cy="submit">
         Search
