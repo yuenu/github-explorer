@@ -24,3 +24,9 @@ hosting**
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# cypress testing report
+cypress/results
+cypress/screenshots
+mochawesome.json
+mochawesome-report

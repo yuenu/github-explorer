@@ -1,36 +1,11 @@
 /// <reference types="cypress" />
 
-const PER_PAGE = 30
 
-describe('First', () => {
+describe('Action', () => {
   beforeEach(() => {
-    cy.intercept('')
-    cy.visit('http://localhost:3000/')
+    cy.visit('/')
   })
 
-  it('Text is correctly', () => {
-    cy.get('[data-cy="heading"]').should('have.text', 'Github Explorer')
-
-    cy.get('[data-cy="title"]').should('have.text', 'Search Repos')
-
-    cy.get('[data-cy="search-input"]').should('have.empty')
-
-    cy.get('[data-cy="submit"]').should('have.text', 'Search')
-  })
-
-  it('Initial load should fetch react repos', () => {
-    cy.get('[data-cy="search-input"]').should('not.have.value')
-
-    cy.get('[data-cy="item-list"]')
-      .find('[data-cy="item"]')
-      .should('have.length', PER_PAGE)
-
-    cy.get('[data-cy="item-list"]')
-      .find('[data-cy="item"]')
-      .each((item) => {
-        cy.wrap(item).contains('react', { matchCase: false })
-      })
-  })
 
   it('fetch repos', () => {
     cy.get('[data-cy="search-input"]')
@@ -44,7 +19,7 @@ describe('First', () => {
 
     cy.get('[data-cy="item-list"]')
       .find('[data-cy="item"]')
-      .should('have.length', PER_PAGE)
+      .should('have.length', 30)
 
 
     cy.get('[data-cy="item-list"]')
@@ -61,7 +36,6 @@ describe('First', () => {
   })
 
 
-
   it.only('Scroll into bottom should fetch more data and url change', () => {
     cy.intercept('https://api.github.com/search/repositories?q=react&page=2&perPage=10').as('getMoreReactRepos')
 
@@ -69,7 +43,7 @@ describe('First', () => {
 
     cy.get('[data-cy="item-list"]')
       .find('[data-cy="item"]')
-      .should('have.length', PER_PAGE)
+      .should('have.length', 30)
 
     cy.get('[data-cy="item-list"]')
       .find('[data-cy="item"]')
@@ -83,7 +57,7 @@ describe('First', () => {
 
     cy.get('[data-cy="item-list"]')
       .find('[data-cy="item"]')
-      .should('have.length', PER_PAGE * 2)
+      .should('have.length', 30 * 2)
 
     cy.url().should('eq', 'http://localhost:3000/search?q=react&page=2')
   })
